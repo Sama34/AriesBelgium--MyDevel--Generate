@@ -22,34 +22,38 @@ function mydevel_generate_info()
 	return array(
 		"name"			=> "MyDevel: Generate",
 		"description"	=> "Generate users, threads and posts for development purposes.",
-		"website"		=> "",
+		"website"		=> "http://mods.mybb.com/view/mydevel-generate",
 		"author"		=> "Aries-Belgium",
 		"authorsite"	=> "mailto:aries.belgium@gmail.com",
-		"version"		=> "1.1",
+		"version"		=> "1.2",
 		"guid" 			=> "f16071e2b1e9bef5c2902fe2cb8acb63",
 		"compatibility" => "16*"
 	);
 }
 
-function mydevel_generate_admin_config_menu($sub_menu)
+function mydevel_generate_admin_config_menu(&$sub_menu)
 {
 	global $mybb;
-	if((int)$mybb->user['uid'] == 1)
+	if(is_super_admin((int)$mybb->user['uid']))
 	{
 		$sub_menu['300'] = array("id" => "mydevel_generate", "title" => "Devel: Generate", "link" => "index.php?module=config-mydevel_generate");
 	}
 }
 
-function mydevel_generate_admin_config_action_handler($actions)
+function mydevel_generate_admin_config_action_handler(&$actions)
 {
-	$actions['mydevel_generate'] = array('active' => 'mydevel_generate', 'file' => '');
+	global $mybb;
+	if(is_super_admin((int)$mybb->user['uid']))
+	{
+		$actions['mydevel_generate'] = array('active' => 'mydevel_generate', 'file' => '');
+	}
 }
 
 function mydevel_generate_admin_load()
 {	
 	global $mybb,$page;
 	
-	if($mybb->input['module'] == "config-mydevel_generate")
+	if(is_super_admin((int)$mybb->user['uid']) && $mybb->input['module'] == "config-mydevel_generate")
 	{
 		$sub_tabs = array(
 			"users" => array(
