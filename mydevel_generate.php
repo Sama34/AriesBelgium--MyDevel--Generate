@@ -27,7 +27,7 @@ function mydevel_generate_info()
 		"authorsite"	=> "mailto:aries.belgium@gmail.com",
 		"version"		=> "1.2",
 		"guid" 			=> "f16071e2b1e9bef5c2902fe2cb8acb63",
-		"compatibility" => "16*"
+		"compatibility" => "18*"
 	);
 }
 
@@ -104,7 +104,8 @@ function mydevel_generate_admin_load()
 							"username" => $user['username'],
 							"message" => mydevel_generate_lorem_ipsum(250,3),
 							"ipaddress" => get_ip(),
-							"posthash" => md5($user['uid'].random_str())
+							"posthash" => md5($user['uid'].random_str()),
+							"options" => []
 						);
 						
 						$posthandler = new PostDataHandler("insert");
@@ -188,7 +189,8 @@ function mydevel_generate_admin_load()
 							"username" => $user['username'],
 							"message" => mydevel_generate_lorem_ipsum(250,3),
 							"ipaddress" => get_ip(),
-							"posthash" => md5($user['uid'].random_str())
+							"posthash" => md5($user['uid'].random_str()),
+							"options" => []
 						);
 						
 						$posthandler = new PostDataHandler("insert");
@@ -416,7 +418,8 @@ function mydevel_generate_set_avatar(&$user,$random)
 		{
 			$avatars[] = $file;
 		}
-		
+		// If no avatar found; append default avatar to supress error with 'array_rand'
+		if(empty($avatars)) $avatars[] = "images/default_avatar.png";
 		mt_srand((double)microtime()*1000000);
 		$random_file = $avatars[array_rand($avatars)];
 		list($image_w,$image_h) = getimagesize($random_file);
@@ -432,7 +435,6 @@ function mydevel_generate_set_avatar(&$user,$random)
 function mydevel_generate_get_forum($array)
 {
 	global $db;
-	
 	mt_srand((double)microtime()*1000000);
 	$fid = $array[array_rand($array)];
 	$forum = get_forum($fid);
@@ -440,9 +442,13 @@ function mydevel_generate_get_forum($array)
 	{
 		$child_forums = array();
 		$query = $db->simple_select("forums","*","pid=".(int)$forum['fid']);
-		while($row = $db->fetch_array($query))
+		while($row = $db->fetch_array($query)){
 			$child_forums[] = $row['fid'];
-		
+		}
+		// If, in-case, category has no child forum; loop through
+		if(empty($child_forums)){
+			return  mydevel_generate_get_forum($array);
+		}
 		return  mydevel_generate_get_forum($child_forums);
 	}
 	
@@ -477,4 +483,3 @@ function mydevel_generate_get_icon($random=false)
 		return 0;
 	}
 }
-
